@@ -55,13 +55,29 @@ while (1) {
             my $data;
             my $bytes_read = $fh->sysread($data, 1024);
             if ($bytes_read) {
-                handle_socks5($fh, $data, $select);
+                handle_socks_version($fh, $data, $select);
             } else {
                 $select->remove($fh);
                 close($fh);
                 debug_log("Client disconnected");
             }
         }
+    }
+}
+
+sub handle_socks_version {
+    my ($client, $data, $select) = @_;
+
+    my ($version) = unpack('C', $data);
+    debug_log("SOCKS version: $version");
+
+    if ($version == 5) {
+        handle_socks5($client, $data, $select);
+    } elsif ($version == 4) {
+        handle_socks4($client, $data, $select);
+    } else {
+        debug_log("Unsupported SOCKS version: $version");
+        close($client);
     }
 }
 
@@ -187,7 +203,10 @@ sub handle_socks5 {
     relay_data($client, $target, $select);
 }
 
-
+sub handle_socks4 {
+    my ($client, $data, $select) = @_;
+    debug_log("Handling SOCKS4 request - Placeholder function");
+}
 
 sub relay_data {
     my ($client, $target, $select) = @_;
