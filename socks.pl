@@ -7,6 +7,9 @@ use POSIX qw(:signal_h);
 my $port = 1080;
 if (@ARGV && $ARGV[0] eq '-p' && $ARGV[1]) {
     $port = $ARGV[1];
+} elsif (@ARGV && $ARGV[0] eq '-h') {
+    print_help();
+    exit(0);
 }
 
 my $server = IO::Socket::INET->new(
@@ -126,4 +129,13 @@ sub relay_data {
             }
         }
     }
+}
+
+sub print_help {
+    print <<'END_HELP';
+Usage: perl socks.pl [OPTIONS]
+Options:
+    -p <port>   Specify the port to listen on (default: 1080)
+    -h          Print this help message
+END_HELP
 }
