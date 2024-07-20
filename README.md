@@ -1,8 +1,14 @@
-# An implementation of socks5 server written in perl
+# SOCKS Proxy Server Implementation in Perl
+
+## Supported Protocols
+This implementation supports the following protocols:
+- SOCKS4
+- SOCKS5
+- SOCKS5h
 
 ## Example:
 ```bash
-perl socks.pl -p 1080 # This will start socks5 listener on port 1080.
+perl socks.pl -p 1080 # This will start a SOCKS listener on port 1080.
 perl socks.pl -h # This will print the help message.
 perl socks.pl -d # This will enable debug logging.
 ```
