@@ -36,8 +36,7 @@ while (1) {
             my $data;
             my $bytes_read = $fh->sysread($data, 1024);
             if ($bytes_read) {
-                # Handle SOCKS5 protocol here
-                handle_socks5($fh, $data);
+                handle_socks5($fh, $data, $select);
             } else {
                 $select->remove($fh);
                 close($fh);
@@ -47,7 +46,7 @@ while (1) {
 }
 
 sub handle_socks5 {
-    my ($client, $data) = @_;
+    my ($client, $data, $select) = @_;
 
     # Initial SOCKS5 handshake
     my ($version, $nmethods) = unpack('C2', $data);
@@ -98,8 +97,15 @@ sub handle_socks5 {
 
     $client->syswrite(pack('C4', 5, 0, 0, 1) . pack('Nn', inet_aton($target->peerhost), $target->peerport));
 
+    # Add target to select
+    $select->add($target);
+
     # Relay data between client and target server
-    my $select = IO::Select->new($client, $target);
+    relay_data($client, $target, $select);
+}
+
+sub relay_data {
+    my ($client, $target, $select) = @_;
     while (1) {
         my @ready = $select->can_read;
         foreach my $fh (@ready) {
@@ -112,6 +118,8 @@ sub handle_socks5 {
                     $client->syswrite($data);
                 }
             } else {
+                $select->remove($client);
+                $select->remove($target);
                 close($client);
                 close($target);
                 return;
