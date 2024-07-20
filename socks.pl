@@ -5,13 +5,16 @@ use IO::Select;
 use POSIX qw(:signal_h);
 use Socket qw(inet_aton);
 
+my $debug = 0;
 
 # Add this debug function at the beginning of your script
 sub debug_log {
     my ($message) = @_;
-    open my $log, '>>', 'socks_debug.log' or die "Could not open log file: $!";
-    print $log "$message\n";
-    close $log;
+    if ($debug) {
+        open my $log, '>>', 'socks_debug.log' or die "Could not open log file: $!";
+        print $log "$message\n";
+        close $log;
+    }
 }
 
 my $port = 1080;
@@ -20,6 +23,8 @@ if (@ARGV && $ARGV[0] eq '-p' && $ARGV[1]) {
 } elsif (@ARGV && $ARGV[0] eq '-h') {
     print_help();
     exit(0);
+} elsif (@ARGV && $ARGV[0] eq '-d') {
+    $debug = 1;
 }
 
 my $server = IO::Socket::INET->new(
@@ -218,5 +223,6 @@ Usage: perl socks.pl [OPTIONS]
 Options:
     -p <port>   Specify the port to listen on (default: 1080)
     -h          Print this help message
+    -d          Enable debug logging
 END_HELP
 }
