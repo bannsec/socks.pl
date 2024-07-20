@@ -2,7 +2,8 @@
 
 # Start the socks program with the '-auth user:pass' option on a random port
 PORT=$(shuf -i 2000-65000 -n 1)
-perl socks.pl -p $PORT -auth testuser:testpass &
+DEBUG_FILE="debug/test_curl_google_socks5_auth_debug.log"
+perl socks.pl -p $PORT -auth testuser:testpass -d $DEBUG_FILE &
 SOCKS_PID=$!
 
 # Wait for the socks program to start

@@ -2,7 +2,8 @@
 
 # Start the socks program on a random port
 PORT=$(shuf -i 2000-65000 -n 1)
-perl socks.pl -p $PORT &
+DEBUG_FILE="debug/test_curl_ip_8_8_8_8_debug.log"
+perl socks.pl -p $PORT -d $DEBUG_FILE &
 SOCKS_PID=$!
 
 # Wait for the socks program to start
