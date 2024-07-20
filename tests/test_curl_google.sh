@@ -6,7 +6,7 @@ perl socks.pl -p $PORT &
 SOCKS_PID=$!
 
 # Wait for the socks program to start
-sleep 2
+sleep 1
 
 # Use the random port to curl Google.com through the proxy
 curl -x socks5h://localhost:$PORT https://www.google.com
