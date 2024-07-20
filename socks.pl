@@ -205,7 +205,42 @@ sub handle_socks5 {
 
 sub handle_socks4 {
     my ($client, $data, $select) = @_;
-    debug_log("Handling SOCKS4 request - Placeholder function");
+
+    debug_log("Handling SOCKS4 request");
+
+    my ($version, $cmd, $port, $ip_packed, $user_id) = unpack('C2 n a4 Z*', $data);
+    debug_log("SOCKS4 request - Version: $version, Command: $cmd, Port: $port, IP: " . join('.', unpack('C4', $ip_packed)) . ", User ID: $user_id");
+
+    if ($version != 4 || $cmd != 1) {
+        debug_log("Invalid SOCKS4 request");
+        close($client);
+        return;
+    }
+
+    my $ip = join('.', unpack('C4', $ip_packed));
+    my $addr = "$ip:$port";
+    debug_log("Target address: $addr");
+
+    # Connect to target server
+    my $target = IO::Socket::INET->new(PeerAddr => $addr, Proto => 'tcp');
+    if (!$target) {
+        debug_log("Failed to connect to target server");
+        $client->syswrite(pack('C8', 0, 91, 0, 0, 0, 0, 0, 0));
+        close($client);
+        return;
+    }
+
+    debug_log("Connected to target server");
+
+    my $response = pack('C8', 0, 90, 0, 0, 0, 0, 0, 0);
+    debug_log("Response to client: " . unpack("H*", $response));
+    $client->syswrite($response);
+
+    # Add target to select
+    $select->add($target);
+
+    # Relay data between client and target server
+    relay_data($client, $target, $select);
 }
 
 sub relay_data {
