@@ -1,47 +1,71 @@
 # SOCKS Proxy Server Implementation in Perl
 
-## Supported Protocols
-This implementation supports the following protocols:
-- SOCKS4
-- SOCKS5
-- SOCKS5h
+This is a Perl implementation of a SOCKS proxy server supporting SOCKS4, SOCKS5, and SOCKS5h protocols.
 
-## Example:
+## Features
+
+- Supports SOCKS4, SOCKS5, and SOCKS5h protocols
+- Optional user/password authentication
+- Configurable port
+- Debug logging (to console or file)
+
+## Usage
+
+Basic usage:
+
 ```bash
-perl socks.pl -p 1080 # This will start a SOCKS listener on port 1080.
-perl socks.pl -h # This will print the help message.
-perl socks.pl -d # This will enable debug logging.
-perl socks.pl -d debug.log # This will enable debug logging to the specified file.
-perl socks.pl -p 1080 -auth user:pass -d # This will start a SOCKS listener on port 1080 with debug logging and authentication.
+perl socks.pl [options]
 ```
 
-Ctrl-c should be used to kill it.
+### Options
 
-## Help
-To print the help message, use the `-h` flag:
-```bash
-perl socks.pl -h
-```
+| Option | Description |
+|--------|-------------|
+| `-p <port>` | Specify the port to listen on (default: 1080) |
+| `-auth <user:pass>` | Enable authentication with specified credentials |
+| `-d [file]` | Enable debug logging (optionally to a file) |
+| `-h` | Display help message |
 
-To enable debug logging, use the `-d` flag:
-```bash
-perl socks.pl -d
-```
+### Examples
 
-To enable debug logging to a specific file, use the `-d` flag followed by the file name:
-```bash
-perl socks.pl -d debug.log
-```
+1. Start a SOCKS listener on default port (1080):
+   ```bash
+   perl socks.pl
+   ```
+
+2. Start a SOCKS listener on port 2020:
+   ```bash
+   perl socks.pl -p 2020
+   ```
+
+3. Enable debug logging to console:
+   ```bash
+   perl socks.pl -d
+   ```
+
+4. Enable debug logging to a file:
+   ```bash
+   perl socks.pl -d debug.log
+   ```
+
+5. Start with authentication:
+   ```bash
+   perl socks.pl -auth user:pass
+   ```
+
+6. Combine multiple options:
+   ```bash
+   perl socks.pl -p 1080 -auth user:pass -d
+   ```
 
 ## Authentication
-To enable user and password authentication, use the `-auth` flag followed by the `user:pass` credentials:
-```bash
-perl socks.pl -auth user:pass
-```
-If the `-auth` option is not specified, the server defaults to an open SOCKS server.
 
-## Multiple Flags Support
-You can use multiple flags together. For example, to start the server on port 1080 with debug logging and authentication, use:
-```bash
-perl socks.pl -p 1080 -d -auth user:pass
-```
+If the `-auth` option is not specified, the server operates as an open SOCKS server without authentication.
+
+## Stopping the Server
+
+To stop the server, use `Ctrl+C` in the terminal where it's running.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
