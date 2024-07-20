@@ -25,3 +25,10 @@ To enable debug logging, use the `-d` flag:
 ```bash
 perl socks.pl -d
 ```
+
+## Authentication
+To enable user and password authentication, use the `-auth` flag followed by the `user:pass` credentials:
+```bash
+perl socks.pl -auth user:pass
+```
+If the `-auth` option is not specified, the server defaults to an open SOCKS server.

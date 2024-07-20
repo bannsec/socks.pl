@@ -6,6 +6,8 @@ use POSIX qw(:signal_h);
 use Socket qw(inet_aton);
 
 my $debug = 0;
+my $auth_user;
+my $auth_pass;
 
 # Add this debug function at the beginning of your script
 sub debug_log {
@@ -25,6 +27,8 @@ if (@ARGV && $ARGV[0] eq '-p' && $ARGV[1]) {
     exit(0);
 } elsif (@ARGV && $ARGV[0] eq '-d') {
     $debug = 1;
+} elsif (@ARGV && $ARGV[0] eq '-auth' && $ARGV[1]) {
+    ($auth_user, $auth_pass) = split(':', $ARGV[1]);
 }
 
 my $server = IO::Socket::INET->new(
@@ -100,14 +104,40 @@ sub handle_socks5 {
     my @methods = unpack("C$nmethods", substr($data, 2));
     debug_log("Authentication methods: " . join(", ", @methods));
 
-    if (!grep { $_ == 0 } @methods) {
-        debug_log("No acceptable authentication method");
-        close($client);
-        return;
-    }
+    if ($auth_user && $auth_pass) {
+        if (!grep { $_ == 2 } @methods) {
+            debug_log("No acceptable authentication method");
+            close($client);
+            return;
+        }
+        $client->syswrite(pack('C2', 5, 2));
+        debug_log("Sent authentication response");
 
-    $client->syswrite(pack('C2', 5, 0));
-    debug_log("Sent authentication response");
+        # Read username and password
+        my $bytes_read = $client->sysread($data, 2);
+        my ($ulen) = unpack('C', substr($data, 1, 1));
+        $bytes_read = $client->sysread($data, $ulen + 1);
+        my $username = unpack("A$ulen", substr($data, 0, $ulen));
+        my ($plen) = unpack('C', substr($data, $ulen, 1));
+        $bytes_read = $client->sysread($data, $plen);
+        my $password = unpack("A$plen", $data);
+
+        if ($username ne $auth_user || $password ne $auth_pass) {
+            debug_log("Invalid username or password");
+            $client->syswrite(pack('C2', 1, 1));
+            close($client);
+            return;
+        }
+        $client->syswrite(pack('C2', 1, 0));
+    } else {
+        if (!grep { $_ == 0 } @methods) {
+            debug_log("No acceptable authentication method");
+            close($client);
+            return;
+        }
+        $client->syswrite(pack('C2', 5, 0));
+        debug_log("Sent authentication response");
+    }
 
     # Read SOCKS5 request
     my $bytes_read = $client->sysread($data, 4);
@@ -278,5 +308,6 @@ Options:
     -p <port>   Specify the port to listen on (default: 1080)
     -h          Print this help message
     -d          Enable debug logging
+    -auth <user:pass> Specify the username and password for authentication
 END_HELP
 }
