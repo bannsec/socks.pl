@@ -6,6 +6,7 @@ use POSIX qw(:signal_h);
 use Socket qw(inet_aton);
 
 my $debug = 0;
+my $debug_file = 'socks_debug.log';
 my $auth_user;
 my $auth_pass;
 
@@ -13,7 +14,7 @@ my $auth_pass;
 sub debug_log {
     my ($message) = @_;
     if ($debug) {
-        open my $log, '>>', 'socks_debug.log' or die "Could not open log file: $!";
+        open my $log, '>>', $debug_file or die "Could not open log file: $!";
         print $log "$message\n";
         close $log;
     }
@@ -27,6 +28,7 @@ if (@ARGV && $ARGV[0] eq '-p' && $ARGV[1]) {
     exit(0);
 } elsif (@ARGV && $ARGV[0] eq '-d') {
     $debug = 1;
+    $debug_file = $ARGV[1] if defined $ARGV[1];
 } elsif (@ARGV && $ARGV[0] eq '-auth' && $ARGV[1]) {
     ($auth_user, $auth_pass) = split(':', $ARGV[1]);
 }
@@ -107,6 +109,8 @@ sub handle_socks5 {
     if ($auth_user && $auth_pass) {
         if (!grep { $_ == 2 } @methods) {
             debug_log("No acceptable authentication method");
+            $client->syswrite(pack('C2', 5, 0xFF)); # Send error message
+            debug_log("Sent error message to client before closing connection");
             close($client);
             return;
         }
@@ -132,6 +136,8 @@ sub handle_socks5 {
     } else {
         if (!grep { $_ == 0 } @methods) {
             debug_log("No acceptable authentication method");
+            $client->syswrite(pack('C2', 5, 0xFF)); # Send error message
+            debug_log("Sent error message to client before closing connection");
             close($client);
             return;
         }
@@ -307,7 +313,7 @@ Usage: perl socks.pl [OPTIONS]
 Options:
     -p <port>   Specify the port to listen on (default: 1080)
     -h          Print this help message
-    -d          Enable debug logging
+    -d [file]   Enable debug logging (optional: specify log file, default: socks_debug.log)
     -auth <user:pass> Specify the username and password for authentication
 END_HELP
 }
