@@ -119,6 +119,7 @@ sub handle_socks5 {
             $client->syswrite(pack('C2', 5, 0xFF)); # Send error message
             debug_log("Sent error message to client before closing connection");
             close($client);
+            $select->remove($client);
             return;
         }
         $client->syswrite(pack('C2', 5, 2));
@@ -137,6 +138,7 @@ sub handle_socks5 {
             debug_log("Invalid username or password");
             $client->syswrite(pack('C2', 1, 1));
             close($client);
+            $select->remove($client);
             return;
         }
         $client->syswrite(pack('C2', 1, 0));
@@ -146,6 +148,7 @@ sub handle_socks5 {
             $client->syswrite(pack('C2', 5, 0xFF)); # Send error message
             debug_log("Sent error message to client before closing connection");
             close($client);
+            $select->remove($client);
             return;
         }
         $client->syswrite(pack('C2', 5, 0));
@@ -163,6 +166,7 @@ sub handle_socks5 {
     if ($ver != 5 || $cmd != 1) {
         debug_log("Invalid SOCKS5 request");
         close($client);
+        $select->remove($client);
         return;
     }
 
@@ -206,6 +210,7 @@ sub handle_socks5 {
     if ($@) {
         debug_log("Error processing address: $@");
         close($client);
+        $select->remove($client);
         return;
     }
 
@@ -217,6 +222,7 @@ sub handle_socks5 {
         debug_log("Failed to connect to target server");
         $client->syswrite(pack('C4', 5, 5, 0, 1) . pack('Nn', 0, 0));
         close($client);
+        $select->remove($client);
         return;
     }
 
@@ -232,7 +238,9 @@ sub handle_socks5 {
     if ($@) {
         debug_log("Error creating response: $@");
         close($client);
+        $select->remove($client);
         close($target);
+        $select->remove($target);
         return;
     }
     
@@ -257,6 +265,7 @@ sub handle_socks4 {
     if ($version != 4 || $cmd != 1) {
         debug_log("Invalid SOCKS4 request");
         close($client);
+        $select->remove($client);
         return;
     }
 
@@ -270,6 +279,7 @@ sub handle_socks4 {
         debug_log("Failed to connect to target server");
         $client->syswrite(pack('C8', 0, 91, 0, 0, 0, 0, 0, 0));
         close($client);
+        $select->remove($client);
         return;
     }
 
