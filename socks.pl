@@ -21,16 +21,23 @@ sub debug_log {
 }
 
 my $port = 1080;
-if (@ARGV && $ARGV[0] eq '-p' && $ARGV[1]) {
-    $port = $ARGV[1];
-} elsif (@ARGV && $ARGV[0] eq '-h') {
-    print_help();
-    exit(0);
-} elsif (@ARGV && $ARGV[0] eq '-d') {
-    $debug = 1;
-    $debug_file = $ARGV[1] if defined $ARGV[1];
-} elsif (@ARGV && $ARGV[0] eq '-auth' && $ARGV[1]) {
-    ($auth_user, $auth_pass) = split(':', $ARGV[1]);
+
+# Iterate through @ARGV and process each flag
+for (my $i = 0; $i < @ARGV; $i++) {
+    if ($ARGV[$i] eq '-p' && $ARGV[$i + 1]) {
+        $port = $ARGV[$i + 1];
+        $i++;
+    } elsif ($ARGV[$i] eq '-h') {
+        print_help();
+        exit(0);
+    } elsif ($ARGV[$i] eq '-d') {
+        $debug = 1;
+        $debug_file = $ARGV[$i + 1] if defined $ARGV[$i + 1];
+        $i++;
+    } elsif ($ARGV[$i] eq '-auth' && $ARGV[$i + 1]) {
+        ($auth_user, $auth_pass) = split(':', $ARGV[$i + 1]);
+        $i++;
+    }
 }
 
 my $server = IO::Socket::INET->new(
@@ -315,5 +322,6 @@ Options:
     -h          Print this help message
     -d [file]   Enable debug logging (optional: specify log file, default: socks_debug.log)
     -auth <user:pass> Specify the username and password for authentication
+    Multiple flags can be used together, e.g., -p 1080 -d -auth user:pass
 END_HELP
 }
