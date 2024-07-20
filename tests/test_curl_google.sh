@@ -10,6 +10,14 @@ sleep 2
 
 # Use the random port to curl Google.com through the proxy
 curl -x socks5h://localhost:$PORT https://www.google.com
+CURL_EXIT_STATUS=$?
+
+# Check the exit status of the curl command
+if [ $CURL_EXIT_STATUS -ne 0 ]; then
+  echo "Curl command failed with exit status $CURL_EXIT_STATUS"
+  kill $SOCKS_PID
+  exit $CURL_EXIT_STATUS
+fi
 
 # Stop the socks program after the test
 kill $SOCKS_PID
