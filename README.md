@@ -1,3 +1,5 @@
+![GitHub Actions Test Status](https://github.com/bannsec/socks.pl/actions/workflows/test.yml/badge.svg)
+
 # SOCKS Proxy Server Implementation in Perl
 
 This is a Perl implementation of a SOCKS proxy server supporting SOCKS4, SOCKS5, and SOCKS5h protocols.
