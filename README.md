@@ -26,6 +26,12 @@ perl socks.pl [options]
 | `-d [file]` | Enable debug logging (optionally to a file) |
 | `-h` | Display help message |
 
+### Environment Variables
+
+| Variable | Description |
+|--------|-------------|
+| `SOCKS_PORT` | Specify the port to listen on (default: 1080) |
+
 ### Examples
 
 1. Start a SOCKS listener on default port (1080):
