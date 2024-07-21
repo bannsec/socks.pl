@@ -58,6 +58,28 @@ perl socks.pl [options]
    perl socks.pl -p 1080 -auth user:pass -d
    ```
 
+### Using the SOCKS_PORT environment variable
+
+You can also specify the port using the `SOCKS_PORT` environment variable. The precedence rules are as follows:
+
+1. If no command line flag or environment variable is set, the default port (1080) is used.
+2. If both the environment variable and the command line flag are set, the command line flag takes precedence.
+3. If either the environment variable or the command line flag is set, the specified value is used.
+
+### Examples with SOCKS_PORT environment variable
+
+1. Start a SOCKS listener on port 2020 using the environment variable:
+   ```bash
+   export SOCKS_PORT=2020
+   perl socks.pl
+   ```
+
+2. Start a SOCKS listener on port 3030 using the command line flag (overrides the environment variable):
+   ```bash
+   export SOCKS_PORT=2020
+   perl socks.pl -p 3030
+   ```
+
 ## Authentication
 
 If the `-auth` option is not specified, the server operates as an open SOCKS server without authentication.

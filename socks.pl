@@ -20,7 +20,7 @@ sub debug_log {
     }
 }
 
-my $port = 1080;
+my $port = $ENV{'SOCKS_PORT'} // 1080;
 
 # Iterate through @ARGV and process each flag
 for (my $i = 0; $i < @ARGV; $i++) {
@@ -40,6 +40,9 @@ for (my $i = 0; $i < @ARGV; $i++) {
     }
 }
 
+my $port_source = $ENV{'SOCKS_PORT'} ? 'environment variable' : 'default';
+$port_source = 'command line flag' if grep { $_ eq '-p' } @ARGV;
+
 my $server = IO::Socket::INET->new(
     LocalPort => $port,
     Proto     => 'tcp',
@@ -47,7 +50,7 @@ my $server = IO::Socket::INET->new(
     Reuse     => 1
 ) or die "Could not create socket: $!\n";
 
-debug_log("SOCKS5 server is running and listening on port $port");
+debug_log("SOCKS5 server is running and listening on port $port (source: $port_source)");
 
 my $select = IO::Select->new($server);
 
